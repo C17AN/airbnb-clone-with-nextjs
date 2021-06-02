@@ -12,9 +12,11 @@ const Selector: React.FC<IProps> = ({ options = [], disabledOptions = [], ...pro
   return (
     <Container>
       <select {...props}>
-        {/* {disabledOptions.map((option, index) => (
-          <option key={index} value={option} disabled />
-        ))} */}
+        {disabledOptions.map((option, index) => (
+          <option key={index} value={option} disabled>
+            {option}
+          </option>
+        ))}
         {options.map((option, index) => (
           <option key={index} value={option}>
             {option}
