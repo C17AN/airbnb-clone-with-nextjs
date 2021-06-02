@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 import CloseXIcon from "../../public/static/svg/modal/modal-close-x.svg";
 import MailIcon from "../../public/static/svg/auth/mail.svg";
@@ -10,6 +10,7 @@ import { dayList, monthList, yearList } from "../../lib/StaticData";
 import Input from "../common/Input";
 import Selector from "../common/Selector";
 import Button from "../common/Button";
+import { signupAPI } from "../../lib/api/auth";
 
 interface Props {}
 
@@ -19,6 +20,10 @@ const SignUpModal: React.FC = (props: Props) => {
   const [lastname, setLastname] = useState("");
   const [password, setPassword] = useState("");
   const [hidePassword, setHidePassword] = useState(true);
+
+  const [birthYear, setBirthYear] = useState<string | undefined>();
+  const [birthDay, setBirthDay] = useState<string | undefined>();
+  const [birthMonth, setBirthMonth] = useState<string | undefined>();
 
   const toggleHidePassword = () => {
     setHidePassword(!hidePassword);
@@ -39,8 +44,39 @@ const SignUpModal: React.FC = (props: Props) => {
     setPassword(e.target.value);
   };
 
+  const onChangeBirthMonth = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setBirthMonth(e.target.value);
+  };
+
+  const onChangeBirthDay = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setBirthDay(e.target.value);
+  };
+
+  const onChangeBirthYear = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setBirthYear(e.target.value);
+  };
+
+  const onSubmitSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const signUpBody = {
+        email,
+        lastname,
+        firstname,
+        password,
+        birthday: new Date(
+          `${birthYear}-${birthMonth!.replace("월", "")}-${birthDay}`
+        ).toISOString(),
+      };
+
+      await signupAPI(signUpBody);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
-    <Container>
+    <Container onSubmit={onSubmitSignUp}>
       <CloseXIcon className="modal-close-x-icon" />
       <div className="input-wrapper">
         <Input
@@ -92,13 +128,28 @@ const SignUpModal: React.FC = (props: Props) => {
       </p>
       <div className="sign-up-modal-birthday-selectors">
         <div className="sign-up-modal-birthday-month-selector">
-          <Selector options={monthList} disabledOptions={["월"]} defaultValue="월" />
+          <Selector
+            options={monthList}
+            disabledOptions={["월"]}
+            defaultValue="월"
+            onChange={onChangeBirthMonth}
+          />
         </div>
         <div className="sign-up-modal-birthday-day-selector">
-          <Selector options={dayList} disabledOptions={["일"]} defaultValue="일" />
+          <Selector
+            options={dayList}
+            disabledOptions={["일"]}
+            defaultValue="일"
+            onChange={onChangeBirthDay}
+          />
         </div>
         <div className="sign-up-modal-birthday-year-selector">
-          <Selector options={yearList} disabledOptions={["년"]} defaultValue="년" />
+          <Selector
+            options={yearList}
+            disabledOptions={["년"]}
+            defaultValue="년"
+            onChange={onChangeBirthYear}
+          />
         </div>
       </div>
       <div className="sign-up-modal-submit-button-wrapper">
@@ -108,7 +159,7 @@ const SignUpModal: React.FC = (props: Props) => {
   );
 };
 
-const Container = styled.div`
+const Container = styled.form`
   width: 568px;
   padding: 32px;
   background-color: white;
